@@ -1,24 +1,27 @@
-def make_judge(grade, points):
-    """判定文字列を作成する
+import random
+from numpy.random import normal, randint
+import pandas as pd
 
-    Args:
-        rank (_type_): _description_
-    """
-    result = None
-    # 点数に10点より下の点数が一つでもあるか判定
-    is_failure = any((data < 10 for data in points))
-    # 点数に30点以下の点数が三回以上あるか判定
-    is_retest = True if sum((data <= 30 for data in points)) >= 3 else False
+def main():
+    # points = randint(0, 100, 500)
+    # print(points)
+    for file_suffix in (16, 23, 3, 25, 12, 6, 19, 15, 18, 28, 5, 8, 20):
+        # 平均値50 標準偏差18の正規分布を500データ作成する
+        points = normal(50, 18, 500)
+        # 100より大きい点数は100に0より小さい点数は0にする
+        points = [data if data > 0 else 0 for data in [int(data) if data < 100 else 100 for data in points]]
+        file_name = f'input_{file_suffix}.csv'
+        with open(file_name, mode='w') as f:
+            for name_index, name in enumerate(range(1, 11)):
+                for subject_index, subject in enumerate(range(1, 6)):
+                    for count_index, count in enumerate(range(1, 11)):
+                        point = points[50*name_index + 10*subject_index + count_index]
+                        f.write(f'{name},{subject},{point}\n')
+        # 一旦Pandasに読み込む
+        df = pd.read_csv(file_name, header=None)
+        # シャッフルして再度CSVに出力する
+        df.sample(frac=1).to_csv(file_name, header=False, index=False)
 
-    if is_failure or grade == "E":
-        result = "不合格"
-    elif is_retest or grade == "D":
-        result = "再テスト"
-    elif grade in ("A", "B", "C"):
-        result = "合格"
 
-    return result
-
-
-if __name__ == "__main__":
-    make_judge("A", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+if __name__ == '__main__':
+    main()
